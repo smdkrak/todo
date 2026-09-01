@@ -26,26 +26,27 @@ export function TaskCard({ task, onClick, onDragStart, accentColor = '#4338ca', 
       draggable={!!onDragStart}
       onDragStart={onDragStart}
       style={{
-        background: '#ffffff',
-        borderRadius: '10px',
-        border: '1px solid rgba(17,24,39,0.07)',
-        padding: '11px 13px',
+        background: 'linear-gradient(145deg, rgba(255,255,255,0.98), rgba(249,250,255,0.96))',
+        borderRadius: '14px',
+        border: '1px solid rgba(48,55,104,0.10)',
+        padding: '14px 14px 13px',
         position: 'relative',
         overflow: 'hidden',
-        minWidth: '190px',
+        minWidth: 0,
+        minHeight: '112px',
         opacity: isDragging ? 0.45 : 1,
         boxShadow: isDragging
           ? 'none'
-          : '0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04)',
+          : '0 10px 24px rgba(35,41,82,0.08), 0 2px 6px rgba(35,41,82,0.04), inset 0 1px 0 rgba(255,255,255,0.9)',
         transition: 'box-shadow 0.2s ease, transform 0.18s ease, opacity 0.15s',
       }}
       onMouseEnter={(e) => {
         if (isDragging) return
-        e.currentTarget.style.boxShadow = `0 6px 20px ${accentColor}1a, 0 0 0 1.5px ${accentColor}28, 0 1px 3px rgba(0,0,0,0.04)`
-        e.currentTarget.style.transform = 'translateY(-2px)'
+        e.currentTarget.style.boxShadow = `0 14px 30px ${accentColor}20, 0 0 0 1.5px ${accentColor}30`
+        e.currentTarget.style.transform = 'translateY(-3px)'
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04)'
+        e.currentTarget.style.boxShadow = '0 10px 24px rgba(35,41,82,0.08), 0 2px 6px rgba(35,41,82,0.04), inset 0 1px 0 rgba(255,255,255,0.9)'
         e.currentTarget.style.transform = 'translateY(0)'
       }}
     >
@@ -56,9 +57,9 @@ export function TaskCard({ task, onClick, onDragStart, accentColor = '#4338ca', 
           left: 0,
           top: 0,
           bottom: 0,
-          width: '3px',
-          background: accentColor,
-          opacity: 0.6,
+          width: '4px',
+          background: `linear-gradient(180deg, ${accentColor}, ${accentColor}80)`,
+          opacity: 0.9,
         }}
       />
 
@@ -85,8 +86,8 @@ export function TaskCard({ task, onClick, onDragStart, accentColor = '#4338ca', 
       {/* Title */}
       <h3
         style={{
-          fontSize: '13px',
-          fontWeight: 600,
+          fontSize: '14px',
+          fontWeight: 700,
           color: '#1a1c3a',
           lineHeight: 1.45,
           margin: 0,
@@ -109,7 +110,7 @@ export function TaskCard({ task, onClick, onDragStart, accentColor = '#4338ca', 
           )}
           <span
             style={{
-              fontSize: '11px',
+              fontSize: '12px',
               fontWeight: 600,
               color: deadlineColor,
               fontFamily: "'DM Sans', monospace",

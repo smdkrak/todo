@@ -47,7 +47,7 @@ export function CalendarWidget({ tasks }: Props) {
             alignItems: 'center',
             padding: '3px 1px',
             borderRadius: '6px',
-            background: isToday ? '#4338ca' : 'transparent',
+            background: isToday ? 'linear-gradient(135deg, #6768ee, #4c4dcc)' : 'transparent',
             cursor: 'default',
             transition: 'background 0.15s',
             minHeight: '28px',
@@ -61,7 +61,7 @@ export function CalendarWidget({ tasks }: Props) {
         >
           <span
             style={{
-              fontSize: '11px',
+              fontSize: '12px',
               fontWeight: isToday ? 700 : 500,
               lineHeight: 1,
               color: isToday ? '#fff' : isSun ? '#ef4444' : isSat ? '#6d28d9' : '#374151',
@@ -78,7 +78,7 @@ export function CalendarWidget({ tasks }: Props) {
                     width: '4px',
                     height: '4px',
                     borderRadius: '50%',
-                    background: isToday ? 'rgba(255,255,255,0.7)' : '#4338ca',
+                    background: isToday ? 'rgba(255,255,255,0.7)' : '#5b5ce2',
                   }}
                 />
               )}
@@ -124,7 +124,7 @@ export function CalendarWidget({ tasks }: Props) {
       >
         <span
           style={{
-            fontSize: '13px',
+            fontSize: '14px',
             fontWeight: 700,
             color: '#1a1c3a',
             fontFamily: "'DM Sans', sans-serif",
@@ -178,7 +178,7 @@ export function CalendarWidget({ tasks }: Props) {
             key={day}
             style={{
               textAlign: 'center',
-              fontSize: '10px',
+              fontSize: '11px',
               fontWeight: 600,
               color: i === 0 ? '#ef4444' : i === 6 ? '#6d28d9' : '#9ca3af',
               fontFamily: "'DM Sans', sans-serif",

@@ -34,7 +34,7 @@ const S = {
     background: '#fff',
   },
   headerTitle: {
-    fontSize: '12px',
+    fontSize: '13px',
     fontWeight: 700,
     color: '#6b7280',
     letterSpacing: '0.1em',
@@ -66,7 +66,7 @@ const S = {
     height: '18px',
     padding: '0 5px',
     borderRadius: '9px',
-    fontSize: '10px',
+    fontSize: '11px',
     fontWeight: 700,
     background: 'rgba(67,56,202,0.1)',
     color: '#4338ca',
@@ -149,7 +149,7 @@ export function NoticePanel({ notices, onAddNotice, onDeleteNotice, onUpdateNoti
                 padding: '5px 8px',
                 border: '1px solid rgba(17,24,39,0.12)',
                 borderRadius: '6px',
-                fontSize: '12px',
+                fontSize: '13px',
                 outline: 'none',
                 background: '#fff',
                 color: '#374151',
@@ -170,7 +170,7 @@ export function NoticePanel({ notices, onAddNotice, onDeleteNotice, onUpdateNoti
                 padding: '5px 8px',
                 border: '1px solid rgba(17,24,39,0.12)',
                 borderRadius: '6px',
-                fontSize: '12px',
+                fontSize: '13px',
                 outline: 'none',
                 background: '#fff',
               }}
@@ -183,7 +183,7 @@ export function NoticePanel({ notices, onAddNotice, onDeleteNotice, onUpdateNoti
                 color: '#fff',
                 border: 'none',
                 borderRadius: '6px',
-                fontSize: '12px',
+                fontSize: '13px',
                 fontWeight: 600,
                 cursor: 'pointer',
                 flexShrink: 0,
@@ -198,7 +198,7 @@ export function NoticePanel({ notices, onAddNotice, onDeleteNotice, onUpdateNoti
       {/* List */}
       <div className="scroll-thin" style={{ flex: 1, overflowY: 'auto', padding: '8px 10px' }}>
         {notices.length === 0 && (
-          <div style={{ textAlign: 'center', paddingTop: '28px', color: '#d1d5db', fontSize: '12px' }}>
+          <div style={{ textAlign: 'center', paddingTop: '28px', color: '#d1d5db', fontSize: '13px' }}>
             공지사항이 없습니다
           </div>
         )}
@@ -222,19 +222,19 @@ export function NoticePanel({ notices, onAddNotice, onDeleteNotice, onUpdateNoti
                       type="date"
                       value={editDate}
                       onChange={(e) => setEditDate(e.target.value)}
-                      style={{ fontSize: '12px', padding: '4px 6px', borderRadius: '5px', border: '1px solid rgba(17,24,39,0.12)', outline: 'none', background: '#fff' }}
+                    style={{ fontSize: '13px', padding: '4px 6px', borderRadius: '5px', border: '1px solid rgba(17,24,39,0.12)', outline: 'none', background: '#fff' }}
                     />
                     <input
                       autoFocus
                       value={editText}
                       onChange={(e) => setEditText(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') handleSaveEdit(notice.id); if (e.key === 'Escape') setEditingId(null) }}
-                      style={{ flex: 1, fontSize: '12px', padding: '4px 6px', borderRadius: '5px', border: '1px solid rgba(17,24,39,0.12)', outline: 'none', background: '#fff' }}
+                    style={{ flex: 1, fontSize: '13px', padding: '4px 6px', borderRadius: '5px', border: '1px solid rgba(17,24,39,0.12)', outline: 'none', background: '#fff' }}
                     />
                   </div>
                   <div style={{ display: 'flex', gap: '5px', justifyContent: 'flex-end' }}>
-                    <button onClick={() => setEditingId(null)} style={{ fontSize: '11px', padding: '3px 8px', cursor: 'pointer', border: '1px solid #e5e7eb', borderRadius: '4px', background: '#fff' }}>취소</button>
-                    <button onClick={() => handleSaveEdit(notice.id)} style={{ fontSize: '11px', padding: '3px 8px', cursor: 'pointer', border: 'none', borderRadius: '4px', background: '#4338ca', color: '#fff', fontWeight: 600 }}>저장</button>
+                  <button onClick={() => setEditingId(null)} style={{ fontSize: '12px', padding: '3px 8px', cursor: 'pointer', border: '1px solid #e5e7eb', borderRadius: '4px', background: '#fff' }}>취소</button>
+                  <button onClick={() => handleSaveEdit(notice.id)} style={{ fontSize: '12px', padding: '3px 8px', cursor: 'pointer', border: 'none', borderRadius: '4px', background: '#5b5ce2', color: '#fff', fontWeight: 600 }}>저장</button>
                   </div>
                 </div>
               ) : (
@@ -256,7 +256,7 @@ export function NoticePanel({ notices, onAddNotice, onDeleteNotice, onUpdateNoti
                   {notice.date && (
                     <span
                       style={{
-                        fontSize: '11px',
+                          fontSize: '12px',
                         fontWeight: 700,
                         color: '#4338ca',
                         background: 'rgba(67,56,202,0.08)',
@@ -273,7 +273,7 @@ export function NoticePanel({ notices, onAddNotice, onDeleteNotice, onUpdateNoti
                   )}
                   <span
                     style={{
-                      fontSize: '13px',
+                          fontSize: '14px',
                       fontWeight: 700,
                       color: '#1a1c3a',
                       lineHeight: 1.35,

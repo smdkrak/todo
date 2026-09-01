@@ -25,14 +25,14 @@ const initialTasks: Task[] = [
 
 /* ── colours ── */
 const C = {
-  accent: '#4338ca',
-  accentDim: 'rgba(67,56,202,0.08)',
-  text1: '#1a1c3a',
-  text2: '#6b7280',
-  text3: '#9ca3af',
-  border: 'rgba(17,24,39,0.08)',
+  accent: '#5b5ce2',
+  accentDim: 'rgba(91,92,226,0.10)',
+  text1: '#171a33',
+  text2: '#5f667f',
+  text3: '#9299ad',
+  border: 'rgba(31,38,75,0.09)',
   surface: '#ffffff',
-  bg: '#edf0f8',
+  bg: '#eef1f8',
 }
 
 export default function App() {
@@ -132,6 +132,7 @@ export default function App() {
       `}</style>
 
       <div
+        className="app-shell"
         style={{
           height: '100%',
           display: 'flex',
@@ -144,10 +145,10 @@ export default function App() {
         {/* ── Top section ── */}
         <div
           className={`top-section${isTopCollapsed ? ' top-collapsed' : ''}${isKanbanCollapsed ? ' kanban-collapsed' : ''}`}
-          style={{ boxShadow: '0 1px 0 rgba(17,24,39,0.07), 0 4px 20px rgba(67,56,202,0.05)' }}
+          style={{ boxShadow: '0 18px 48px rgba(30,35,75,0.08)' }}
         >
           {/* Notice panel */}
-          <div style={{ borderRight: `1px solid ${C.border}`, overflow: 'hidden', position: 'relative' }}>
+          <div className="top-panel notice-shell" style={{ borderRight: `1px solid ${C.border}`, overflow: 'hidden', position: 'relative' }}>
             <NoticePanel
               notices={notices}
               onAddNotice={handleAddNotice}
@@ -183,16 +184,16 @@ export default function App() {
 
           {/* Center — search + gather */}
           <div
-            className="center-col"
+            className="center-col top-panel"
             style={{
-              background: '#f9faff',
+              background: 'rgba(248,249,255,0.82)',
               borderRight: `1px solid ${C.border}`,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '14px',
-              padding: '20px',
+              gap: '16px',
+              padding: '24px',
             }}
           >
             {/* Search */}
@@ -201,11 +202,11 @@ export default function App() {
                 display: 'flex',
                 alignItems: 'center',
                 background: '#fff',
-                borderRadius: '10px',
-                padding: '9px 14px',
+                borderRadius: '14px',
+                padding: '11px 16px',
                 width: '85%',
                 border: '1px solid rgba(17,24,39,0.09)',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                boxShadow: '0 10px 28px rgba(38,45,92,0.08), inset 0 1px 0 rgba(255,255,255,0.8)',
                 gap: '8px',
               }}
             >
@@ -219,7 +220,7 @@ export default function App() {
                   border: 'none',
                   outline: 'none',
                   flex: 1,
-                  fontSize: '13px',
+                  fontSize: '14px',
                   color: C.text1,
                   background: 'transparent',
                   fontFamily: "'DM Sans', 'Noto Sans KR', sans-serif",
@@ -242,16 +243,16 @@ export default function App() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '7px',
-                padding: '9px 20px',
-                background: C.accent,
+                padding: '11px 22px',
+                background: 'linear-gradient(135deg, #6768ee 0%, #4c4dcc 100%)',
                 color: '#fff',
-                borderRadius: '10px',
+                borderRadius: '13px',
                 border: 'none',
                 cursor: 'pointer',
-                fontSize: '13px',
-                fontWeight: 600,
+                fontSize: '14px',
+                fontWeight: 700,
                 fontFamily: "'DM Sans', 'Noto Sans KR', sans-serif",
-                boxShadow: '0 4px 14px rgba(67,56,202,0.28)',
+                boxShadow: '0 10px 24px rgba(76,77,204,0.28), inset 0 1px 0 rgba(255,255,255,0.24)',
                 transition: 'opacity 0.15s, box-shadow 0.15s',
               }}
               onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.88')}
@@ -263,23 +264,24 @@ export default function App() {
           </div>
 
           {/* Calendar */}
-          <div style={{ overflow: 'hidden' }}>
+          <div className="top-panel calendar-shell" style={{ overflow: 'hidden' }}>
             <CalendarWidget tasks={tasks} />
           </div>
         </div>
 
         {/* ── Tab bar ── */}
         <div
+          className="category-bar"
           style={{
             flexShrink: 0,
-            height: '50px',
+            height: '58px',
             display: 'flex',
             alignItems: 'center',
             background: C.surface,
-            padding: '0 20px',
+            padding: '0 26px',
             gap: '4px',
             borderBottom: `1px solid ${C.border}`,
-            boxShadow: '0 1px 0 rgba(17,24,39,0.04)',
+            boxShadow: '0 10px 30px rgba(30,35,75,0.06)',
             overflowX: 'auto',
             zIndex: 20,
           }}
@@ -287,7 +289,7 @@ export default function App() {
         >
           <span
             style={{
-              fontSize: '10px',
+              fontSize: '11px',
               fontWeight: 700,
               color: C.text3,
               letterSpacing: '0.12em',
@@ -311,9 +313,9 @@ export default function App() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  padding: '5px 14px',
+                  padding: '7px 16px',
                   borderRadius: '20px',
-                  fontSize: '13px',
+                  fontSize: '14px',
                   fontWeight: 600,
                   border: 'none',
                   cursor: 'pointer',
@@ -322,7 +324,7 @@ export default function App() {
                   color: isActive ? '#fff' : C.text2,
                   fontFamily: "'DM Sans', 'Noto Sans KR', sans-serif",
                   flexShrink: 0,
-                  boxShadow: isActive ? '0 2px 8px rgba(26,28,58,0.20)' : 'none',
+                  boxShadow: isActive ? '0 7px 18px rgba(26,28,58,0.22), inset 0 1px 0 rgba(255,255,255,0.16)' : 'none',
                 }}
               >
                 {cat.name}
@@ -352,7 +354,7 @@ export default function App() {
               gap: '4px',
               padding: '5px 10px',
               borderRadius: '20px',
-              fontSize: '12px',
+              fontSize: '13px',
               fontWeight: 600,
               background: 'transparent',
               border: `1px dashed ${C.border}`,

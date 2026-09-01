@@ -18,9 +18,9 @@ const COLUMNS: {
   accent: string
   accentDim: string
 }[] = [
-  { status: 'todo', label: 'TODO', accent: '#4338ca', accentDim: 'rgba(67,56,202,0.12)' },
-  { status: 'doing', label: 'DOING', accent: '#6d28d9', accentDim: 'rgba(109,40,217,0.10)' },
-  { status: 'done', label: 'DONE', accent: '#047857', accentDim: 'rgba(4,120,87,0.10)' },
+  { status: 'todo', label: 'TODO', accent: '#5b5ce2', accentDim: 'rgba(91,92,226,0.12)' },
+  { status: 'doing', label: 'DOING', accent: '#a855f7', accentDim: 'rgba(168,85,247,0.11)' },
+  { status: 'done', label: 'DONE', accent: '#0f9f78', accentDim: 'rgba(15,159,120,0.11)' },
 ]
 
 const SORT_OPTIONS: { mode: SortMode; label: string }[] = [
@@ -156,9 +156,9 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
             style={{
               display: 'flex',
               flexDirection: 'column',
-              background: isDropTarget ? `rgba(67,56,202,0.03)` : '#f6f7fb',
-              borderRight: idx < 2 ? '1px solid rgba(17,24,39,0.07)' : 'none',
-              borderBottom: '1px solid rgba(17,24,39,0.07)',
+              background: isDropTarget ? `${col.accent}0d` : 'rgba(248,249,253,0.72)',
+              borderRight: idx < 2 ? '1px solid rgba(31,38,75,0.08)' : 'none',
+              borderBottom: '1px solid rgba(31,38,75,0.08)',
               transition: 'background 0.2s',
             }}
             onDragOver={(e) => handleDragOver(e, col.status)}
@@ -167,21 +167,22 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
           >
             {/* Column header */}
             <div
+              className="kanban-column-header"
               style={{
                 flexShrink: 0,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '14px 16px',
-                background: '#fff',
-                borderBottom: '1px solid rgba(17,24,39,0.07)',
-                borderTop: `2.5px solid ${col.accent}`,
+                padding: '16px 18px',
+                background: 'rgba(255,255,255,0.88)',
+                borderBottom: '1px solid rgba(31,38,75,0.08)',
+                borderTop: `3px solid ${col.accent}`,
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span
                   style={{
-                    fontSize: '11px',
+                    fontSize: '13px',
                     fontWeight: 800,
                     color: col.accent,
                     letterSpacing: '0.12em',
@@ -192,7 +193,7 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
                 </span>
                 <span
                   style={{
-                    fontSize: '12px',
+                    fontSize: '13px',
                     fontWeight: 600,
                     color: '#9ca3af',
                     fontFamily: "'DM Sans', monospace",
@@ -214,9 +215,9 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '26px',
-                    height: '26px',
-                    borderRadius: '6px',
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '9px',
                     border: mode !== 'default' ? `1.5px solid ${col.accent}40` : '1px solid rgba(17,24,39,0.1)',
                     background: mode !== 'default' ? col.accentDim : 'transparent',
                     color: mode !== 'default' ? col.accent : '#9ca3af',
@@ -295,10 +296,10 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
-                    fontSize: '12px',
+                    fontSize: '13px',
                     fontWeight: 600,
-                    padding: '5px 10px',
-                    borderRadius: '6px',
+                    padding: '7px 11px',
+                    borderRadius: '9px',
                     background: 'transparent',
                     color: '#6b7280',
                     border: '1px solid rgba(17,24,39,0.1)',
@@ -326,7 +327,7 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
             {/* Cards area */}
             <div
               className="scroll-thin"
-              style={{ flex: 1, overflowY: 'auto', padding: '12px 12px' }}
+              style={{ flex: 1, overflowY: 'auto', padding: '16px 14px' }}
             >
               {colTasks.length === 0 ? (
                 <EmptyState accent={col.accent} />
@@ -367,7 +368,7 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
                     </div>
                     <div
                       className="kanban-col-cards-inner"
-                      style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+                      style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '10px' }}
                     >
                       {groupTasks.map((task) => (
                         <TaskCard
@@ -385,7 +386,7 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
               ) : (
                 <div
                   className="kanban-col-cards-inner"
-                  style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+                  style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '10px' }}
                 >
                   {sorted.map((task) => (
                     <TaskCard
