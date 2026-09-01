@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CalendarDays, ChevronLeft, ChevronRight, Loader2, Unplug } from 'lucide-react'
 import type { Task } from '../types'
 
-interface Props { tasks: Task[] }
+interface Props { tasks: Task[]; googleAccessToken?: string | null }
 interface GoogleCalendarEvent { id: string; summary?: string; start?: { date?: string; dateTime?: string } }
 interface CalendarDayItem { id: string; title: string; source: 'google' | 'task'; time?: string }
 interface CalendarPopover { dateKey: string; label: string; items: CalendarDayItem[]; left: number; top: number; pinned: boolean }
@@ -61,7 +61,7 @@ function toDateKey(event: GoogleCalendarEvent) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
-export function CalendarWidget({ tasks }: Props) {
+export function CalendarWidget({ tasks, googleAccessToken }: Props) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [googleEvents, setGoogleEvents] = useState<GoogleCalendarEvent[]>([])
   const [accessToken, setAccessToken] = useState<string | null>(null)
@@ -70,6 +70,10 @@ export function CalendarWidget({ tasks }: Props) {
   const [calendarError, setCalendarError] = useState<string | null>(null)
   const [popover, setPopover] = useState<CalendarPopover | null>(null)
   const tokenClientRef = useRef<GoogleTokenClient | null>(null)
+
+  useEffect(() => {
+    if (googleAccessToken) setAccessToken(googleAccessToken)
+  }, [googleAccessToken])
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
@@ -260,7 +264,7 @@ export function CalendarWidget({ tasks }: Props) {
       </div>
       <div className="calendar-grid">{cells}</div>
       {popover && (
-        <div className="calendar-popover" style={{ left: popover.left, top: popover.top }} role="dialog" aria-label={`${popover.label} 일정`}>
+        <div className={`calendar-popover${popover.pinned ? ' pinned' : ''}`} style={{ left: popover.left, top: popover.top }} role="dialog" aria-label={`${popover.label} 일정`}>
           <div className="calendar-popover-header"><strong>{popover.label}</strong><span>{popover.items.length}개</span></div>
           <div className="calendar-popover-list">
             {popover.items.map((item) => (

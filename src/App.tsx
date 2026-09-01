@@ -334,7 +334,7 @@ export default function App() {
 
           {/* Calendar */}
           <div className="top-panel calendar-shell" style={{ overflow: 'hidden' }}>
-            <CalendarWidget tasks={tasks} />
+            <CalendarWidget tasks={tasks} googleAccessToken={session?.provider_token} />
           </div>
         </div>
 

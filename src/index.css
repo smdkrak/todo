@@ -258,6 +258,7 @@ select {
 .calendar-popover-item strong { color: #33384f; font-size: 12px; line-height: 1.35; }
 .calendar-popover-item span { color: #9298aa; font-size: 9px; }
 .calendar-popover-hint { display: block; padding-top: 10px; color: #a1a6b5; font-size: 8px; text-align: center; }
+.calendar-popover.pinned { left: 50% !important; top: auto !important; bottom: 18px; width: min(360px, calc(100vw - 28px)); transform: translateX(-50%); pointer-events: auto; }
 
 /* ─── mobile ─── */
 @media (max-width: 768px) {
@@ -292,12 +293,14 @@ select {
   .kanban-wrapper {
     margin: 10px;
     border-radius: 16px;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .kanban-container {
     display: flex !important;
     flex-direction: column !important;
-    overflow-y: auto !important;
+    overflow: visible !important;
     height: auto !important;
   }
 
