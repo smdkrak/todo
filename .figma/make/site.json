@@ -1,0 +1,10 @@
+{
+  "description": "Streamline task management with a Kanban board, Google Calendar integration, and announcement features for enhanced productivity in personal and professional settings.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

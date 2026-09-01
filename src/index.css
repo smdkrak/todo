@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap');
+@import 'tailwindcss';
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'DM Sans', 'Noto Sans KR', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #edf0f8;
+}
+
+/* ─── scrollbars ─── */
+.scroll-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scroll-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+.scroll-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+/* ─── top section collapse ─── */
+.top-section {
+  height: 33vh;
+  min-height: 220px;
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+  transition: height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    min-height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  position: relative;
+}
+
+.top-section.top-collapsed {
+  height: 0 !important;
+  min-height: 0 !important;
+}
+
+/* ─── kanban wrapper collapse ─── */
+.kanban-wrapper {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ─── animations ─── */
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.animate-modal {
+  animation: modal-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fade {
+  animation: fade-in 0.15s ease-out forwards;
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-slide-down {
+  animation: slide-down 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ─── mobile ─── */
+@media (max-width: 768px) {
+  .top-section {
+    height: 25vh;
+    min-height: 160px;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .top-section.top-collapsed {
+    height: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* When kanban is collapsed, let top section fill */
+  .top-section.kanban-collapsed {
+    flex: 1;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none;
+  }
+
+  .center-col {
+    display: none !important;
+  }
+
+  .kanban-wrapper.kanban-collapsed {
+    flex: 0 0 0;
+    overflow: hidden;
+  }
+
+  .kanban-container {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    height: auto !important;
+  }
+
+  .kanban-column {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 280px;
+  }
+
+  .kanban-column .scroll-thin {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  .kanban-col-cards-inner {
+    flex-direction: row !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .mobile-only {
+    display: flex !important;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+.mobile-only {
+  display: none;
+}
+
+/* ─── task card hover handled in JS, but nice to have cursor ─── */
+.task-card {
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.18s ease;
+}
