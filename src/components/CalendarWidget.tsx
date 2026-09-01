@@ -230,7 +230,7 @@ export function CalendarWidget({ tasks, googleAccessToken, onGoogleAuthorization
           const rect = event.currentTarget.getBoundingClientRect()
           setPopover((current) => current?.dateKey === dateKey && current.pinned ? null : { dateKey, label: `${month + 1}월 ${day}일`, items: dayItems, left: rect.left + rect.width / 2, top: rect.top, pinned: true })
         }}
-        style={{ background: isToday ? 'linear-gradient(145deg, #6768ee, #4c4dcc)' : 'transparent', cursor: dayItems.length ? 'help' : 'default' }}
+        style={{ background: isToday ? 'linear-gradient(145deg, #6768ee, #4c4dcc)' : 'transparent', cursor: dayItems.length ? 'pointer' : 'default' }}
       >
         <div className="calendar-day-heading">
           <span style={{ fontSize: '12px', fontWeight: isToday ? 800 : 600, color: isToday ? '#fff' : isSunday ? '#ef4444' : isSaturday ? '#6d28d9' : '#374151' }}>{day}</span>
