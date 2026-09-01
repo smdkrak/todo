@@ -4,6 +4,8 @@ import type { Task } from '../types'
 
 interface Props { tasks: Task[] }
 interface GoogleCalendarEvent { id: string; summary?: string; start?: { date?: string; dateTime?: string } }
+interface CalendarDayItem { id: string; title: string; source: 'google' | 'task'; time?: string }
+interface CalendarPopover { dateKey: string; label: string; items: CalendarDayItem[]; left: number; top: number; pinned: boolean }
 interface GoogleTokenResponse { access_token?: string; error?: string; error_description?: string }
 interface GoogleTokenClient { requestAccessToken: (options?: { prompt?: string }) => void }
 
@@ -66,6 +68,7 @@ export function CalendarWidget({ tasks }: Props) {
   const [isConnecting, setIsConnecting] = useState(false)
   const [isLoadingEvents, setIsLoadingEvents] = useState(false)
   const [calendarError, setCalendarError] = useState<string | null>(null)
+  const [popover, setPopover] = useState<CalendarPopover | null>(null)
   const tokenClientRef = useRef<GoogleTokenClient | null>(null)
 
   const year = currentDate.getFullYear()
@@ -171,6 +174,7 @@ export function CalendarWidget({ tasks }: Props) {
         id: `google-${event.id}`,
         title: event.summary ?? '제목 없는 일정',
         source: 'google' as const,
+        time: event.start?.dateTime ? new Date(event.start.dateTime).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' }) : '종일',
       })),
       ...dayTasks.map((task) => ({
         id: `task-${task.id}`,
@@ -183,8 +187,25 @@ export function CalendarWidget({ tasks }: Props) {
     cells.push(
       <div
         key={dateKey}
-        title={dayItems.map((item) => item.title).join('\n') || undefined}
         className="calendar-day"
+        tabIndex={dayItems.length ? 0 : undefined}
+        aria-label={dayItems.length ? `${month + 1}월 ${day}일 일정 ${dayItems.length}개` : undefined}
+        onMouseEnter={(event) => {
+          if (!dayItems.length || popover?.pinned) return
+          const rect = event.currentTarget.getBoundingClientRect()
+          setPopover({ dateKey, label: `${month + 1}월 ${day}일`, items: dayItems, left: rect.left + rect.width / 2, top: rect.top, pinned: false })
+        }}
+        onMouseLeave={() => setPopover((current) => current?.pinned ? current : null)}
+        onFocus={(event) => {
+          if (!dayItems.length) return
+          const rect = event.currentTarget.getBoundingClientRect()
+          setPopover({ dateKey, label: `${month + 1}월 ${day}일`, items: dayItems, left: rect.left + rect.width / 2, top: rect.top, pinned: false })
+        }}
+        onClick={(event) => {
+          if (!dayItems.length) return
+          const rect = event.currentTarget.getBoundingClientRect()
+          setPopover((current) => current?.dateKey === dateKey && current.pinned ? null : { dateKey, label: `${month + 1}월 ${day}일`, items: dayItems, left: rect.left + rect.width / 2, top: rect.top, pinned: true })
+        }}
         style={{ background: isToday ? 'linear-gradient(145deg, #6768ee, #4c4dcc)' : 'transparent', cursor: dayItems.length ? 'help' : 'default' }}
       >
         <div className="calendar-day-heading">
@@ -238,6 +259,20 @@ export function CalendarWidget({ tasks }: Props) {
         {DAYS.map((day, index) => <div key={day} style={{ color: index === 0 ? '#ef4444' : index === 6 ? '#6d28d9' : '#9ca3af' }}>{day}</div>)}
       </div>
       <div className="calendar-grid">{cells}</div>
+      {popover && (
+        <div className="calendar-popover" style={{ left: popover.left, top: popover.top }} role="dialog" aria-label={`${popover.label} 일정`}>
+          <div className="calendar-popover-header"><strong>{popover.label}</strong><span>{popover.items.length}개</span></div>
+          <div className="calendar-popover-list">
+            {popover.items.map((item) => (
+              <div className="calendar-popover-item" key={item.id}>
+                <i className={item.source} />
+                <div><strong>{item.title}</strong><span>{item.source === 'google' ? `Google Calendar · ${item.time}` : 'TODO'}</span></div>
+              </div>
+            ))}
+          </div>
+          {popover.pinned && <span className="calendar-popover-hint">날짜를 다시 누르면 닫힙니다</span>}
+        </div>
+      )}
     </div>
   )
 }
