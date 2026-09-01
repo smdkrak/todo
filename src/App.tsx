@@ -104,18 +104,16 @@ export default function App() {
   }
 
   const refreshGoogleAuthorization = useCallback(async () => {
-    if (!supabase) return
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-        scopes: 'https://www.googleapis.com/auth/calendar.readonly',
-        queryParams: { access_type: 'offline', prompt: 'consent', include_granted_scopes: 'true' },
-        skipBrowserRedirect: true,
-      },
-    })
-    if (error) throw error
-    if (data.url) window.location.assign(data.url)
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined
+    if (!supabaseUrl) return
+    const authorizeUrl = new URL(`${supabaseUrl}/auth/v1/authorize`)
+    authorizeUrl.searchParams.set('provider', 'google')
+    authorizeUrl.searchParams.set('redirect_to', window.location.origin)
+    authorizeUrl.searchParams.set('scopes', 'https://www.googleapis.com/auth/calendar.readonly')
+    authorizeUrl.searchParams.set('access_type', 'offline')
+    authorizeUrl.searchParams.set('prompt', 'consent')
+    authorizeUrl.searchParams.set('include_granted_scopes', 'true')
+    window.location.assign(authorizeUrl.toString())
   }, [])
 
   const filteredTasks = useMemo(() => {
