@@ -62,11 +62,10 @@ export default function App() {
 
   useEffect(() => {
     if (!supabase) return
-    void supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session)
-      if (!data.session) setIsCloudLoading(false)
+    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession)
+      if (!nextSession) setIsCloudLoading(false)
     })
-    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession))
     return () => data.subscription.unsubscribe()
   }, [])
 
