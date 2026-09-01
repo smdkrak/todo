@@ -167,6 +167,28 @@ select {
   animation: slide-down 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.8s linear infinite; }
+
+.calendar-widget { display: flex; flex-direction: column; height: 100%; background: #fff; padding: 12px 14px; overflow: hidden; }
+.calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; flex-shrink: 0; gap: 8px; }
+.calendar-month { font-size: 14px; font-weight: 700; color: #1a1c3a; white-space: nowrap; }
+.calendar-connected-dot { width: 7px; height: 7px; border-radius: 50%; background: #34a853; box-shadow: 0 0 0 3px rgba(52,168,83,.12); }
+.calendar-error { margin-top: 2px; max-width: 145px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px; color: #ef4444; }
+.calendar-actions { display: flex; align-items: center; gap: 3px; }
+.calendar-connect-button { display: flex; align-items: center; gap: 4px; height: 26px; padding: 0 7px; border: 1px solid rgba(31,38,75,.1); border-radius: 8px; background: rgba(91,92,226,.07); color: #5b5ce2; cursor: pointer; font-size: 10px; font-weight: 700; }
+.calendar-connect-button.connected { color: #18864b; background: rgba(52,168,83,.08); }
+.calendar-connect-button:disabled { opacity: .6; cursor: wait; }
+.calendar-nav-button { display: flex; align-items: center; padding: 3px 4px; border: 0; border-radius: 4px; background: transparent; color: #9ca3af; cursor: pointer; }
+.calendar-weekdays, .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.calendar-weekdays { margin-bottom: 4px; flex-shrink: 0; }
+.calendar-weekdays > div { text-align: center; font-size: 11px; font-weight: 600; }
+.calendar-grid { flex: 1; align-content: start; }
+.calendar-day { display: flex; flex-direction: column; align-items: center; min-height: 28px; padding: 3px 1px; border-radius: 6px; transition: background .15s; }
+.calendar-day:hover { background: rgba(17,24,39,.05) !important; }
+.calendar-dots { display: flex; gap: 2px; margin-top: 2px; }
+.calendar-dots i { width: 4px; height: 4px; border-radius: 50%; }
+
 /* ─── mobile ─── */
 @media (max-width: 768px) {
   .top-section {
@@ -239,6 +261,8 @@ select {
   .desktop-only {
     display: none !important;
   }
+
+  .calendar-connect-label { display: none; }
 }
 
 @media (min-width: 769px) and (max-width: 1180px) {
