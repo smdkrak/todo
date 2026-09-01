@@ -1,11 +1,15 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import type { Session } from '@supabase/supabase-js'
 import { NoticePanel } from './components/NoticePanel'
 import { CalendarWidget } from './components/CalendarWidget'
 import { KanbanBoard } from './components/KanbanBoard'
 import { TaskModal } from './components/TaskModal'
 import { NoticeListModal } from './components/NoticeListModal'
+import { AuthGate } from './components/AuthGate'
 import { Search, Layers, X, ChevronDown, ChevronUp, Plus } from 'lucide-react'
 import type { Category, Task, TaskStatus, Notice } from './types'
+import { isSupabaseConfigured, supabase } from './lib/supabase'
+import { loadTodoData, removeNotice, removeTask, saveCategory, saveNotice, saveTask } from './lib/database'
 
 const initialNotices: Notice[] = [
   { id: 'n1', text: '9월 전체 팀 미팅 — 오전 10시 (대회의실 A)', date: '2026-09-05' },
@@ -52,6 +56,52 @@ export default function App() {
   /* mobile collapse */
   const [isTopCollapsed, setIsTopCollapsed] = useState(false)
   const [isKanbanCollapsed, setIsKanbanCollapsed] = useState(false)
+  const [session, setSession] = useState<Session | null>(null)
+  const [isCloudLoading, setIsCloudLoading] = useState(isSupabaseConfigured)
+  const [cloudError, setCloudError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!supabase) return
+    void supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session)
+      if (!data.session) setIsCloudLoading(false)
+    })
+    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession))
+    return () => data.subscription.unsubscribe()
+  }, [])
+
+  useEffect(() => {
+    if (!session) return
+    let active = true
+    setIsCloudLoading(true)
+    setCloudError(null)
+    void loadTodoData()
+      .then(async (data) => {
+        if (!active) return
+        if (data.categories.length === 0) {
+          await Promise.all(initialCategories.map((category) => saveCategory(session.user.id, category)))
+          if (!active) return
+          setCategories(initialCategories)
+          setTasks([])
+          setNotices([])
+          setActiveCategoryId(initialCategories[0].id)
+        } else {
+          setCategories(data.categories)
+          setTasks(data.tasks)
+          setNotices(data.notices)
+          setActiveCategoryId((current) => data.categories.some((category) => category.id === current) ? current : data.categories[0].id)
+        }
+      })
+      .catch((error) => setCloudError(error instanceof Error ? error.message : '클라우드 데이터를 불러오지 못했습니다.'))
+      .finally(() => { if (active) setIsCloudLoading(false) })
+    return () => { active = false }
+  }, [session])
+
+  const syncSafely = (operation: Promise<unknown>) => {
+    if (!session) return
+    setCloudError(null)
+    void operation.catch((error) => setCloudError(error instanceof Error ? error.message : '클라우드 저장에 실패했습니다.'))
+  }
 
   const filteredTasks = useMemo(() => {
     let filtered = tasks.filter((t) => t.category === activeCategoryId)
@@ -78,9 +128,13 @@ export default function App() {
 
   const handleSaveTask = (taskData: Omit<Task, 'id'>) => {
     if (isCreatingTask) {
-      setTasks((prev) => [...prev, { ...taskData, id: `task-${Date.now()}` }])
+      const task = { ...taskData, id: `task-${Date.now()}` }
+      setTasks((prev) => [...prev, task])
+      if (session) syncSafely(saveTask(session.user.id, task))
     } else if (selectedTask) {
-      setTasks((prev) => prev.map((t) => (t.id === selectedTask.id ? { ...t, ...taskData } : t)))
+      const task = { ...selectedTask, ...taskData }
+      setTasks((prev) => prev.map((item) => (item.id === selectedTask.id ? task : item)))
+      if (session) syncSafely(saveTask(session.user.id, task))
     }
     setSelectedTask(null)
     setIsCreatingTask(false)
@@ -90,22 +144,30 @@ export default function App() {
     setTasks((prev) => prev.filter((t) => t.id !== id))
     setSelectedTask(null)
     setIsCreatingTask(false)
+    if (session) syncSafely(removeTask(id))
   }
 
   const handleUpdateTaskStatus = (id: string, newStatus: TaskStatus) => {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t)))
+    const task = tasks.find((item) => item.id === id)
+    setTasks((prev) => prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item)))
+    if (session && task) syncSafely(saveTask(session.user.id, { ...task, status: newStatus }))
   }
 
   const handleAddNotice = (text: string, date?: string) => {
-    setNotices((prev) => [...prev, { id: `n-${Date.now()}`, text, date }])
+    const notice = { id: `n-${Date.now()}`, text, date }
+    setNotices((prev) => [...prev, notice])
+    if (session) syncSafely(saveNotice(session.user.id, notice))
   }
 
   const handleDeleteNotice = (id: string) => {
     setNotices((prev) => prev.filter((n) => n.id !== id))
+    if (session) syncSafely(removeNotice(id))
   }
 
   const handleUpdateNotice = (id: string, text: string, date?: string) => {
-    setNotices((prev) => prev.map((n) => (n.id === id ? { ...n, text, date } : n)))
+    const notice = { id, text, date }
+    setNotices((prev) => prev.map((item) => (item.id === id ? notice : item)))
+    if (session) syncSafely(saveNotice(session.user.id, notice))
   }
 
   const handleAddCategory = () => {
@@ -114,11 +176,18 @@ export default function App() {
       const newCat = { id: `cat-${Date.now()}`, name }
       setCategories((prev) => [...prev, newCat])
       setActiveCategoryId(newCat.id)
+      if (session) syncSafely(saveCategory(session.user.id, newCat))
     }
   }
 
   const todoCount = (catId: string) =>
     tasks.filter((t) => t.category === catId && t.status === 'todo').length
+
+  if (isSupabaseConfigured && !session && !isCloudLoading) return <AuthGate />
+
+  if (isSupabaseConfigured && isCloudLoading) {
+    return <div className="cloud-loading"><div className="cloud-loading-orbit" /><span>클라우드 데이터를 불러오는 중...</span></div>
+  }
 
   return (
     <>
@@ -271,7 +340,7 @@ export default function App() {
 
         {/* ── Tab bar ── */}
         <div
-          className="category-bar"
+          className="category-bar scroll-hidden"
           style={{
             flexShrink: 0,
             height: '58px',
@@ -285,8 +354,16 @@ export default function App() {
             overflowX: 'auto',
             zIndex: 20,
           }}
-          className="scroll-hidden"
         >
+          {session && (
+            <div className="cloud-session-wrap">
+              <div className="cloud-session" title={cloudError ?? session.user.email ?? '클라우드 연결됨'}>
+                <span className={cloudError ? 'error' : ''} />
+                {cloudError ? '동기화 오류' : '클라우드 동기화'}
+              </div>
+              <button className="cloud-signout" onClick={() => void supabase?.auth.signOut()}>로그아웃</button>
+            </div>
+          )}
           <span
             style={{
               fontSize: '11px',
