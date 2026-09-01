@@ -166,21 +166,40 @@ export function CalendarWidget({ tasks }: Props) {
     const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     const dayTasks = tasks.filter((task) => task.deadline === dateKey)
     const dayGoogleEvents = eventsByDate.get(dateKey) ?? []
+    const dayItems = [
+      ...dayGoogleEvents.map((event) => ({
+        id: `google-${event.id}`,
+        title: event.summary ?? '제목 없는 일정',
+        source: 'google' as const,
+      })),
+      ...dayTasks.map((task) => ({
+        id: `task-${task.id}`,
+        title: task.title,
+        source: 'task' as const,
+      })),
+    ]
     const isSunday = (firstDay + day - 1) % 7 === 0
     const isSaturday = (firstDay + day - 1) % 7 === 6
     cells.push(
       <div
         key={dateKey}
-        title={dayGoogleEvents.map((event) => event.summary ?? '제목 없는 일정').join('\n') || undefined}
+        title={dayItems.map((item) => item.title).join('\n') || undefined}
         className="calendar-day"
-        style={{ background: isToday ? 'linear-gradient(135deg, #6768ee, #4c4dcc)' : 'transparent', cursor: dayGoogleEvents.length ? 'help' : 'default' }}
+        style={{ background: isToday ? 'linear-gradient(145deg, #6768ee, #4c4dcc)' : 'transparent', cursor: dayItems.length ? 'help' : 'default' }}
       >
-        <span style={{ fontSize: '12px', fontWeight: isToday ? 700 : 500, color: isToday ? '#fff' : isSunday ? '#ef4444' : isSaturday ? '#6d28d9' : '#374151' }}>{day}</span>
-        {(dayTasks.length > 0 || dayGoogleEvents.length > 0) && (
-          <div className="calendar-dots">
-            {dayTasks.some((task) => task.status !== 'done') && <i style={{ background: isToday ? 'rgba(255,255,255,0.7)' : '#5b5ce2' }} />}
-            {dayTasks.some((task) => task.status === 'done') && <i style={{ background: isToday ? 'rgba(255,255,255,0.5)' : '#0f9f78' }} />}
-            {dayGoogleEvents.length > 0 && <i style={{ background: isToday ? '#fff' : '#ea4335', boxShadow: '0 0 0 2px rgba(234,67,53,0.12)' }} />}
+        <div className="calendar-day-heading">
+          <span style={{ fontSize: '12px', fontWeight: isToday ? 800 : 600, color: isToday ? '#fff' : isSunday ? '#ef4444' : isSaturday ? '#6d28d9' : '#374151' }}>{day}</span>
+          {dayItems.length > 0 && <span className="calendar-day-count" style={{ color: isToday ? '#fff' : '#7c83a0', background: isToday ? 'rgba(255,255,255,.18)' : 'rgba(68,76,126,.08)' }}>{dayItems.length}</span>}
+        </div>
+        {dayItems.length > 0 && (
+          <div className="calendar-event-list">
+            {dayItems.slice(0, 2).map((item) => (
+              <div key={item.id} className={`calendar-event-chip ${item.source}${isToday ? ' today' : ''}`}>
+                <i />
+                <span>{item.title}</span>
+              </div>
+            ))}
+            {dayItems.length > 2 && <span className="calendar-more">+{dayItems.length - 2}</span>}
           </div>
         )}
       </div>,
@@ -210,6 +229,10 @@ export function CalendarWidget({ tasks }: Props) {
           <button className="calendar-nav-button" onClick={() => setCurrentDate(new Date(year, month - 1, 1))}><ChevronLeft size={14} /></button>
           <button className="calendar-nav-button" onClick={() => setCurrentDate(new Date(year, month + 1, 1))}><ChevronRight size={14} /></button>
         </div>
+      </div>
+      <div className="calendar-legend">
+        <span><i className="google" />Google 일정</span>
+        <span><i className="task" />TODO</span>
       </div>
       <div className="calendar-weekdays">
         {DAYS.map((day, index) => <div key={day} style={{ color: index === 0 ? '#ef4444' : index === 6 ? '#6d28d9' : '#9ca3af' }}>{day}</div>)}
