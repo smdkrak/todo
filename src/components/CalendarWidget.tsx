@@ -74,10 +74,10 @@ export function CalendarWidget({ tasks, googleAccessToken }: Props) {
   const tokenClientRef = useRef<GoogleTokenClient | null>(null)
 
   useEffect(() => {
-    if (!googleAccessToken) return
+    if (!googleAccessToken || accessToken) return
     sessionStorage.setItem(GOOGLE_TOKEN_STORAGE_KEY, googleAccessToken)
     setAccessToken(googleAccessToken)
-  }, [googleAccessToken])
+  }, [accessToken, googleAccessToken])
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
