@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { CalendarDays, ChevronLeft, ChevronRight, Loader2, Unplug } from 'lucide-react'
 import type { Task } from '../types'
 
@@ -28,6 +29,7 @@ declare global {
 const DAYS = ['일', '월', '화', '수', '목', '금', '토']
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined
 const GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly'
+const GOOGLE_TOKEN_STORAGE_KEY = 'todo-google-calendar-token'
 let googleScriptPromise: Promise<void> | null = null
 
 function loadGoogleIdentityScript() {
@@ -64,7 +66,7 @@ function toDateKey(event: GoogleCalendarEvent) {
 export function CalendarWidget({ tasks, googleAccessToken }: Props) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [googleEvents, setGoogleEvents] = useState<GoogleCalendarEvent[]>([])
-  const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [accessToken, setAccessToken] = useState<string | null>(() => sessionStorage.getItem(GOOGLE_TOKEN_STORAGE_KEY))
   const [isConnecting, setIsConnecting] = useState(false)
   const [isLoadingEvents, setIsLoadingEvents] = useState(false)
   const [calendarError, setCalendarError] = useState<string | null>(null)
@@ -72,7 +74,9 @@ export function CalendarWidget({ tasks, googleAccessToken }: Props) {
   const tokenClientRef = useRef<GoogleTokenClient | null>(null)
 
   useEffect(() => {
-    if (googleAccessToken) setAccessToken(googleAccessToken)
+    if (!googleAccessToken) return
+    sessionStorage.setItem(GOOGLE_TOKEN_STORAGE_KEY, googleAccessToken)
+    setAccessToken(googleAccessToken)
   }, [googleAccessToken])
 
   const year = currentDate.getFullYear()
@@ -97,10 +101,14 @@ export function CalendarWidget({ tasks, googleAccessToken }: Props) {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (response.status === 401) {
+        sessionStorage.removeItem(GOOGLE_TOKEN_STORAGE_KEY)
         setAccessToken(null)
         throw new Error('Google 연결이 만료되었습니다. 다시 연결해 주세요.')
       }
-      if (!response.ok) throw new Error('Google Calendar 일정을 불러오지 못했습니다.')
+      if (!response.ok) {
+        const detail = (await response.json().catch(() => null)) as { error?: { message?: string } } | null
+        throw new Error(detail?.error?.message ?? 'Google Calendar 일정을 불러오지 못했습니다.')
+      }
       const data = (await response.json()) as { items?: GoogleCalendarEvent[] }
       setGoogleEvents(data.items ?? [])
     } catch (error) {
@@ -144,6 +152,7 @@ export function CalendarWidget({ tasks, googleAccessToken }: Props) {
               setCalendarError(response.error_description ?? 'Google Calendar 연결이 취소되었습니다.')
               return
             }
+            sessionStorage.setItem(GOOGLE_TOKEN_STORAGE_KEY, response.access_token)
             setAccessToken(response.access_token)
           },
           error_callback: () => {
@@ -162,6 +171,7 @@ export function CalendarWidget({ tasks, googleAccessToken }: Props) {
   const disconnectGoogleCalendar = () => {
     if (accessToken && window.google) window.google.accounts.oauth2.revoke(accessToken)
     setAccessToken(null)
+    sessionStorage.removeItem(GOOGLE_TOKEN_STORAGE_KEY)
     setGoogleEvents([])
     setCalendarError(null)
   }
@@ -263,7 +273,7 @@ export function CalendarWidget({ tasks, googleAccessToken }: Props) {
         {DAYS.map((day, index) => <div key={day} style={{ color: index === 0 ? '#ef4444' : index === 6 ? '#6d28d9' : '#9ca3af' }}>{day}</div>)}
       </div>
       <div className="calendar-grid">{cells}</div>
-      {popover && (
+      {popover && createPortal(
         <div className={`calendar-popover${popover.pinned ? ' pinned' : ''}`} style={{ left: popover.left, top: popover.top }} role="dialog" aria-label={`${popover.label} 일정`}>
           <div className="calendar-popover-header"><strong>{popover.label}</strong><span>{popover.items.length}개</span></div>
           <div className="calendar-popover-list">
@@ -275,7 +285,8 @@ export function CalendarWidget({ tasks, googleAccessToken }: Props) {
             ))}
           </div>
           {popover.pinned && <span className="calendar-popover-hint">날짜를 다시 누르면 닫힙니다</span>}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   )
