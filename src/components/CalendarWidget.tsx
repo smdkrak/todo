@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { CalendarDays, ChevronLeft, ChevronRight, Loader2, Unplug } from 'lucide-react'
 import type { Task } from '../types'
 
-interface Props { tasks: Task[]; googleAccessToken?: string | null }
+interface Props { tasks: Task[]; googleAccessToken?: string | null; onGoogleAuthorizationRequired?: () => Promise<void> }
 interface GoogleCalendarEvent { id: string; summary?: string; start?: { date?: string; dateTime?: string } }
 interface CalendarDayItem { id: string; title: string; source: 'google' | 'task'; time?: string }
 interface CalendarPopover { dateKey: string; label: string; items: CalendarDayItem[]; left: number; top: number; pinned: boolean }
@@ -30,6 +30,7 @@ const DAYS = ['일', '월', '화', '수', '목', '금', '토']
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined
 const GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly'
 const GOOGLE_TOKEN_STORAGE_KEY = 'todo-google-calendar-token'
+const GOOGLE_REAUTH_STORAGE_KEY = 'todo-google-calendar-reauth-attempted'
 let googleScriptPromise: Promise<void> | null = null
 
 function loadGoogleIdentityScript() {
@@ -63,7 +64,7 @@ function toDateKey(event: GoogleCalendarEvent) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
-export function CalendarWidget({ tasks, googleAccessToken }: Props) {
+export function CalendarWidget({ tasks, googleAccessToken, onGoogleAuthorizationRequired }: Props) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [googleEvents, setGoogleEvents] = useState<GoogleCalendarEvent[]>([])
   const [accessToken, setAccessToken] = useState<string | null>(() => sessionStorage.getItem(GOOGLE_TOKEN_STORAGE_KEY))
@@ -76,6 +77,7 @@ export function CalendarWidget({ tasks, googleAccessToken }: Props) {
   useEffect(() => {
     if (!googleAccessToken || accessToken) return
     sessionStorage.setItem(GOOGLE_TOKEN_STORAGE_KEY, googleAccessToken)
+    sessionStorage.removeItem(GOOGLE_REAUTH_STORAGE_KEY)
     setAccessToken(googleAccessToken)
   }, [accessToken, googleAccessToken])
 
@@ -100,14 +102,21 @@ export function CalendarWidget({ tasks, googleAccessToken }: Props) {
       const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      if (response.status === 401) {
+      const detail = response.ok ? null : (await response.json().catch(() => null)) as { error?: { message?: string; status?: string } } | null
+      const apiMessage = detail?.error?.message ?? ''
+      const needsAuthorization = response.status === 401 || (response.status === 403 && /insufficient authentication scopes/i.test(apiMessage))
+      if (needsAuthorization) {
         sessionStorage.removeItem(GOOGLE_TOKEN_STORAGE_KEY)
         setAccessToken(null)
-        throw new Error('Google 연결이 만료되었습니다. 다시 연결해 주세요.')
+        if (onGoogleAuthorizationRequired && !sessionStorage.getItem(GOOGLE_REAUTH_STORAGE_KEY)) {
+          sessionStorage.setItem(GOOGLE_REAUTH_STORAGE_KEY, 'true')
+          void onGoogleAuthorizationRequired()
+          throw new Error('Google Calendar 권한을 갱신하는 중입니다...')
+        }
+        throw new Error('Google Calendar 권한 갱신이 필요합니다. Google 버튼을 눌러 주세요.')
       }
       if (!response.ok) {
-        const detail = (await response.json().catch(() => null)) as { error?: { message?: string } } | null
-        throw new Error(detail?.error?.message ?? 'Google Calendar 일정을 불러오지 못했습니다.')
+        throw new Error(apiMessage || 'Google Calendar 일정을 불러오지 못했습니다.')
       }
       const data = (await response.json()) as { items?: GoogleCalendarEvent[] }
       setGoogleEvents(data.items ?? [])
@@ -117,7 +126,7 @@ export function CalendarWidget({ tasks, googleAccessToken }: Props) {
     } finally {
       setIsLoadingEvents(false)
     }
-  }, [])
+  }, [onGoogleAuthorizationRequired])
 
   useEffect(() => {
     if (accessToken) void fetchGoogleEvents(accessToken, year, month)
@@ -153,6 +162,7 @@ export function CalendarWidget({ tasks, googleAccessToken }: Props) {
               return
             }
             sessionStorage.setItem(GOOGLE_TOKEN_STORAGE_KEY, response.access_token)
+            sessionStorage.removeItem(GOOGLE_REAUTH_STORAGE_KEY)
             setAccessToken(response.access_token)
           },
           error_callback: () => {

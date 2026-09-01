@@ -17,7 +17,7 @@ export function AuthGate() {
       options: {
         redirectTo: window.location.origin,
         scopes: 'https://www.googleapis.com/auth/calendar.readonly',
-        queryParams: { access_type: 'offline', prompt: 'consent' },
+        queryParams: { access_type: 'offline', prompt: 'consent', include_granted_scopes: 'true' },
       },
     })
     if (authError) {

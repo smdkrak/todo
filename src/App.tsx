@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { NoticePanel } from './components/NoticePanel'
 import { CalendarWidget } from './components/CalendarWidget'
@@ -102,6 +102,18 @@ export default function App() {
     setCloudError(null)
     void operation.catch((error) => setCloudError(error instanceof Error ? error.message : '클라우드 저장에 실패했습니다.'))
   }
+
+  const refreshGoogleAuthorization = useCallback(async () => {
+    if (!supabase) return
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin,
+        scopes: 'https://www.googleapis.com/auth/calendar.readonly',
+        queryParams: { access_type: 'offline', prompt: 'consent', include_granted_scopes: 'true' },
+      },
+    })
+  }, [])
 
   const filteredTasks = useMemo(() => {
     let filtered = tasks.filter((t) => t.category === activeCategoryId)
@@ -334,7 +346,7 @@ export default function App() {
 
           {/* Calendar */}
           <div className="top-panel calendar-shell" style={{ overflow: 'hidden' }}>
-            <CalendarWidget tasks={tasks} googleAccessToken={session?.provider_token} />
+            <CalendarWidget tasks={tasks} googleAccessToken={session?.provider_token} onGoogleAuthorizationRequired={refreshGoogleAuthorization} />
           </div>
         </div>
 
