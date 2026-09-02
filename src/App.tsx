@@ -51,6 +51,7 @@ export default function App() {
 
   const [showNoticeList, setShowNoticeList] = useState(false)
   const [showGatherModal, setShowGatherModal] = useState(false)
+  const [gatherSort, setGatherSort] = useState<'status' | 'date'>('status')
   const [searchQuery, setSearchQuery] = useState('')
 
   /* mobile collapse */
@@ -126,6 +127,35 @@ export default function App() {
     }
     return filtered
   }, [tasks, activeCategoryId, searchQuery])
+
+  const classifications = useMemo(
+    () => Array.from(new Set(tasks.map((task) => task.classification?.trim()).filter((tag): tag is string => Boolean(tag)))).sort((a, b) => a.localeCompare(b, 'ko')),
+    [tasks],
+  )
+
+  const gatherGroups = useMemo(() => {
+    const activeTasks = tasks.filter((task) => task.category === activeCategoryId)
+    if (gatherSort === 'status') {
+      return [
+        { key: 'todo', label: 'TODO', accent: '#4338ca', tasks: activeTasks.filter((task) => task.status === 'todo') },
+        { key: 'doing', label: 'DOING', accent: '#6d28d9', tasks: activeTasks.filter((task) => task.status === 'doing') },
+        { key: 'done', label: 'DONE', accent: '#047857', tasks: activeTasks.filter((task) => task.status === 'done') },
+      ]
+    }
+    const groups = new Map<string, Task[]>()
+    activeTasks.forEach((task) => {
+      const key = task.deadline || 'no-date'
+      groups.set(key, [...(groups.get(key) ?? []), task])
+    })
+    return Array.from(groups.entries())
+      .sort(([a], [b]) => a === 'no-date' ? 1 : b === 'no-date' ? -1 : a.localeCompare(b))
+      .map(([key, groupedTasks]) => ({
+        key,
+        label: key === 'no-date' ? '날짜 미정' : new Date(`${key}T00:00:00`).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' }),
+        accent: '#5b5ce2',
+        tasks: groupedTasks.sort((a, b) => a.status.localeCompare(b.status) || a.title.localeCompare(b.title, 'ko')),
+      }))
+  }, [activeCategoryId, gatherSort, tasks])
 
   const handleAddTask = (status: TaskStatus) => {
     setNewTaskStatus(status)
@@ -520,6 +550,7 @@ export default function App() {
             defaultStatus={newTaskStatus}
             defaultCategory={activeCategoryId}
             categories={categories}
+            classifications={classifications}
             onSave={handleSaveTask}
             onDelete={handleDeleteTask}
             onClose={() => {
@@ -589,6 +620,11 @@ export default function App() {
                     {categories.find((c) => c.id === activeCategoryId)?.name || '전체'} 카테고리
                   </p>
                 </div>
+                <div className="gather-sort-toggle" style={{ display: 'flex', padding: '3px', borderRadius: '9px', background: 'rgba(31,38,75,.06)', gap: '2px' }}>
+                  {([['status', '상태별'], ['date', '날짜순']] as const).map(([mode, label]) => (
+                    <button key={mode} onClick={() => setGatherSort(mode)} style={{ padding: '6px 9px', border: 0, borderRadius: '7px', background: gatherSort === mode ? '#fff' : 'transparent', color: gatherSort === mode ? C.accent : C.text3, boxShadow: gatherSort === mode ? '0 2px 8px rgba(31,38,75,.1)' : 'none', fontSize: '11px', fontWeight: 750, cursor: 'pointer' }}>{label}</button>
+                  ))}
+                </div>
                 <button
                   onClick={() => setShowGatherModal(false)}
                   style={{
@@ -610,16 +646,9 @@ export default function App() {
 
               {/* Modal body */}
               <div className="scroll-thin" style={{ overflowY: 'auto', flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {(
-                  [
-                    { status: 'todo', label: 'TODO', accent: '#4338ca' },
-                    { status: 'doing', label: 'DOING', accent: '#6d28d9' },
-                    { status: 'done', label: 'DONE', accent: '#047857' },
-                  ] as const
-                ).map(({ status, label, accent }) => {
-                  const statusTasks = tasks.filter((t) => t.status === status && t.category === activeCategoryId)
+                {gatherGroups.map(({ key, label, accent, tasks: statusTasks }) => {
                   return (
-                    <div key={status}>
+                    <div key={key}>
                       <div
                         style={{
                           display: 'flex',
@@ -676,6 +705,11 @@ export default function App() {
                               />
                               <div style={{ flex: 1 }}>
                                 <span style={{ fontWeight: 600 }}>{t.title}</span>
+                                {gatherSort === 'date' && (
+                                  <span style={{ marginLeft: '8px', fontSize: '10px', color: t.status === 'done' ? '#047857' : t.status === 'doing' ? '#6d28d9' : '#4338ca', fontWeight: 800 }}>
+                                    {t.status.toUpperCase()}
+                                  </span>
+                                )}
                                 {t.classification && (
                                   <span
                                     style={{

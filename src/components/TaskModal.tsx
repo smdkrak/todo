@@ -7,6 +7,7 @@ interface Props {
   defaultStatus: TaskStatus
   defaultCategory: string
   categories: Category[]
+  classifications: string[]
   onSave: (task: Omit<Task, 'id'>) => void
   onDelete: (id: string) => void
   onClose: () => void
@@ -17,6 +18,7 @@ export function TaskModal({
   defaultStatus,
   defaultCategory,
   categories,
+  classifications,
   onSave,
   onDelete,
   onClose,
@@ -194,6 +196,7 @@ export function TaskModal({
                   분류 (태그)
                 </label>
                 <input
+                  list="classification-options"
                   type="text"
                   value={classification}
                   onChange={(e) => setClassification(e.target.value)}
@@ -207,6 +210,12 @@ export function TaskModal({
                     outline: 'none',
                   }}
                 />
+                <datalist id="classification-options">
+                  {classifications.map((tag) => <option key={tag} value={tag} />)}
+                </datalist>
+                <span style={{ display: 'block', marginTop: '5px', color: '#9ca3af', fontSize: '11px' }}>
+                  기존 태그를 선택하거나 새 태그를 입력하세요.
+                </span>
               </div>
               <div>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px' }}>

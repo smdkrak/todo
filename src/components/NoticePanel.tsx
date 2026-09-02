@@ -131,6 +131,7 @@ export function NoticePanel({ notices, onAddNotice, onDeleteNotice, onUpdateNoti
       {/* Add form */}
       {isAdding && (
         <div
+          className="notice-add-form"
           style={{
             padding: '10px 14px',
             borderBottom: '1px solid rgba(17,24,39,0.06)',
@@ -140,8 +141,9 @@ export function NoticePanel({ notices, onAddNotice, onDeleteNotice, onUpdateNoti
             gap: '6px',
           }}
         >
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div className="notice-add-row" style={{ display: 'flex', gap: '6px' }}>
             <input
+              className="notice-add-date"
               type="date"
               value={newDate}
               onChange={(e) => setNewDate(e.target.value)}
@@ -157,6 +159,7 @@ export function NoticePanel({ notices, onAddNotice, onDeleteNotice, onUpdateNoti
               }}
             />
             <input
+              className="notice-add-text"
               autoFocus
               value={newText}
               onChange={(e) => setNewText(e.target.value)}
@@ -176,6 +179,7 @@ export function NoticePanel({ notices, onAddNotice, onDeleteNotice, onUpdateNoti
               }}
             />
             <button
+              className="notice-add-submit"
               onClick={handleAdd}
               style={{
                 padding: '0 12px',

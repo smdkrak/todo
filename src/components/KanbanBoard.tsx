@@ -160,6 +160,8 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
               borderRight: idx < 2 ? '1px solid rgba(31,38,75,0.08)' : 'none',
               borderBottom: '1px solid rgba(31,38,75,0.08)',
               transition: 'background 0.2s',
+              minHeight: 0,
+              overflow: 'visible',
             }}
             onDragOver={(e) => handleDragOver(e, col.status)}
             onDrop={(e) => handleDrop(e, col.status)}
@@ -177,6 +179,8 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
                 background: 'rgba(255,255,255,0.88)',
                 borderBottom: '1px solid rgba(31,38,75,0.08)',
                 borderTop: `3px solid ${col.accent}`,
+                position: 'relative',
+                zIndex: isMenuOpen ? 60 : 5,
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -327,7 +331,7 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
             {/* Cards area */}
             <div
               className="scroll-thin"
-              style={{ flex: 1, overflowY: 'auto', padding: '16px 14px' }}
+              style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '12px 14px', position: 'relative', zIndex: 1 }}
             >
               {colTasks.length === 0 ? (
                 <EmptyState accent={col.accent} />

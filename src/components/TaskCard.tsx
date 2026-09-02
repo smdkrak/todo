@@ -29,11 +29,11 @@ export function TaskCard({ task, onClick, onDragStart, accentColor = '#4338ca', 
         background: 'linear-gradient(145deg, rgba(255,255,255,0.98), rgba(249,250,255,0.96))',
         borderRadius: '14px',
         border: '1px solid rgba(48,55,104,0.10)',
-        padding: '14px 14px 13px',
+        padding: '10px 12px 10px',
         position: 'relative',
         overflow: 'hidden',
         minWidth: 0,
-        minHeight: '112px',
+        minHeight: '84px',
         opacity: isDragging ? 0.45 : 1,
         boxShadow: isDragging
           ? 'none'
@@ -65,7 +65,7 @@ export function TaskCard({ task, onClick, onDragStart, accentColor = '#4338ca', 
 
       {/* Classification chip */}
       {task.classification && (
-        <div style={{ marginBottom: '7px' }}>
+        <div style={{ marginBottom: '5px' }}>
           <span
             style={{
               fontSize: '10px',
@@ -104,7 +104,7 @@ export function TaskCard({ task, onClick, onDragStart, accentColor = '#4338ca', 
 
       {/* Deadline */}
       {deadline && (
-        <div style={{ marginTop: '7px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <div style={{ marginTop: '5px', display: 'flex', alignItems: 'center', gap: '4px' }}>
           {isOverdue && (
             <span style={{ fontSize: '10px', fontWeight: 700, color: '#ef4444' }}>⚠</span>
           )}

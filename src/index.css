@@ -349,6 +349,14 @@ select {
 
   .cloud-session { font-size: 0; }
   .cloud-signout { display: none; }
+
+  .notice-add-form { padding: 7px 9px !important; }
+  .notice-add-row { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; gap: 5px !important; }
+  .notice-add-date { grid-column: 1; grid-row: 1; width: 100%; min-width: 0; }
+  .notice-add-submit { grid-column: 2; grid-row: 1; min-height: 31px; }
+  .notice-add-text { grid-column: 1 / -1; grid-row: 2; width: 100%; min-width: 0; }
+
+  .gather-sort-toggle { margin-left: auto; }
 }
 
 @media (min-width: 769px) and (max-width: 1180px) {
