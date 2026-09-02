@@ -10,7 +10,7 @@ export async function loadTodoData() {
   const client = requireClient()
   const [categoriesResult, tasksResult, noticesResult] = await Promise.all([
     client.from('categories').select('id, name').order('created_at'),
-    client.from('tasks').select('id, title, deadline, content, image_url, status, category_id, classification').order('created_at'),
+    client.from('tasks').select('id, title, deadline, content, image_url, status, category_id, classification, sort_order').order('sort_order').order('created_at'),
     client.from('notices').select('id, text, date').order('created_at'),
   ])
   const error = categoriesResult.error ?? tasksResult.error ?? noticesResult.error
@@ -27,6 +27,7 @@ export async function loadTodoData() {
       status: row.status,
       category: row.category_id,
       classification: row.classification ?? '',
+      sortOrder: row.sort_order ?? 0,
     })) as Task[],
     notices: (noticesResult.data ?? []).map((row) => ({ id: row.id, text: row.text, date: row.date ?? undefined })) as Notice[],
   }
@@ -48,6 +49,7 @@ export async function saveTask(userId: string, task: Task) {
     status: task.status,
     category_id: task.category,
     classification: task.classification ?? '',
+    sort_order: task.sortOrder ?? 0,
     updated_at: new Date().toISOString(),
   })
   if (error) throw error

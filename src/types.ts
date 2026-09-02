@@ -20,4 +20,5 @@ export interface Task {
   status: TaskStatus;
   category: string; // id of category
   classification: string; // priority -> classification
+  sortOrder?: number;
 }

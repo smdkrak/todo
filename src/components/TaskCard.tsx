@@ -6,9 +6,11 @@ interface Props {
   onDragStart?: (e: React.DragEvent<HTMLDivElement>) => void
   accentColor?: string
   isDragging?: boolean
+  onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void
+  onDrop?: (e: React.DragEvent<HTMLDivElement>) => void
 }
 
-export function TaskCard({ task, onClick, onDragStart, accentColor = '#4338ca', isDragging = false }: Props) {
+export function TaskCard({ task, onClick, onDragStart, onDragOver, onDrop, accentColor = '#4338ca', isDragging = false }: Props) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const deadline = task.deadline ? new Date(task.deadline) : null
@@ -25,6 +27,8 @@ export function TaskCard({ task, onClick, onDragStart, accentColor = '#4338ca', 
       onClick={onClick}
       draggable={!!onDragStart}
       onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
       style={{
         background: 'linear-gradient(145deg, rgba(255,255,255,0.98), rgba(249,250,255,0.96))',
         borderRadius: '14px',
@@ -33,7 +37,7 @@ export function TaskCard({ task, onClick, onDragStart, accentColor = '#4338ca', 
         position: 'relative',
         overflow: 'hidden',
         minWidth: 0,
-        minHeight: '84px',
+        height: '112px',
         opacity: isDragging ? 0.45 : 1,
         boxShadow: isDragging
           ? 'none'

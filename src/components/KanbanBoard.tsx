@@ -7,7 +7,7 @@ interface Props {
   tasks: Task[]
   onSelectTask: (task: Task) => void
   onAddTask: (status: TaskStatus) => void
-  onUpdateTaskStatus?: (taskId: string, newStatus: TaskStatus) => void
+  onMoveTask?: (taskId: string, newStatus: TaskStatus, beforeTaskId?: string) => void
 }
 
 type SortMode = 'default' | 'deadline' | 'classification'
@@ -86,7 +86,7 @@ function EmptyState({ accent }: { accent: string }) {
   )
 }
 
-export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus }: Props) {
+export function KanbanBoard({ tasks, onSelectTask, onAddTask, onMoveTask }: Props) {
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const [dragOverCol, setDragOverCol] = useState<TaskStatus | null>(null)
   const [sortModes, setSortModes] = useState<Record<TaskStatus, SortMode>>({
@@ -109,6 +109,7 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
     setDraggedId(id)
+    setSortModes({ todo: 'default', doing: 'default', done: 'default' })
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.setData('text/plain', id)
   }
@@ -121,8 +122,18 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, status: TaskStatus) => {
     e.preventDefault()
-    if (draggedId && onUpdateTaskStatus) {
-      onUpdateTaskStatus(draggedId, status)
+    if (draggedId && onMoveTask) {
+      onMoveTask(draggedId, status)
+    }
+    setDraggedId(null)
+    setDragOverCol(null)
+  }
+
+  const handleCardDrop = (e: React.DragEvent<HTMLDivElement>, status: TaskStatus, beforeTaskId: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (draggedId && draggedId !== beforeTaskId && onMoveTask) {
+      onMoveTask(draggedId, status, beforeTaskId)
     }
     setDraggedId(null)
     setDragOverCol(null)
@@ -381,6 +392,8 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
                           accentColor={col.accent}
                           onClick={() => onSelectTask(task)}
                           onDragStart={(e) => handleDragStart(e, task.id)}
+                          onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragOverCol(col.status) }}
+                          onDrop={(e) => handleCardDrop(e, col.status, task.id)}
                           isDragging={draggedId === task.id}
                         />
                       ))}
@@ -399,6 +412,8 @@ export function KanbanBoard({ tasks, onSelectTask, onAddTask, onUpdateTaskStatus
                       accentColor={col.accent}
                       onClick={() => onSelectTask(task)}
                       onDragStart={(e) => handleDragStart(e, task.id)}
+                      onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragOverCol(col.status) }}
+                      onDrop={(e) => handleCardDrop(e, col.status, task.id)}
                       isDragging={draggedId === task.id}
                     />
                   ))}

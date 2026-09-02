@@ -145,6 +145,8 @@ export function NoticePanel({ notices, onAddNotice, onDeleteNotice, onUpdateNoti
             <input
               className="notice-add-date"
               type="date"
+              aria-label="공지 날짜 (선택사항)"
+              title="날짜는 선택사항입니다"
               value={newDate}
               onChange={(e) => setNewDate(e.target.value)}
               style={{

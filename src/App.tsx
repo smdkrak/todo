@@ -11,20 +11,9 @@ import type { Category, Task, TaskStatus, Notice } from './types'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 import { loadTodoData, removeNotice, removeTask, saveCategory, saveNotice, saveTask } from './lib/database'
 
-const initialNotices: Notice[] = [
-  { id: 'n1', text: '9월 전체 팀 미팅 — 오전 10시 (대회의실 A)', date: '2026-09-05' },
-  { id: 'n2', text: 'Q3 성과 보고서 제출 마감', date: '2026-09-10' },
-]
-
 const initialCategories: Category[] = [
   { id: 'work', name: '업무' },
   { id: 'life', name: '일상' },
-]
-
-const initialTasks: Task[] = [
-  { id: 'w1', title: 'Q3 프로젝트 기획서 작성', status: 'todo', category: 'work', classification: '긴급', deadline: '2026-09-05' },
-  { id: 'w2', title: 'UI 디자인 시안 검토', status: 'todo', category: 'work', classification: '중요', deadline: '2026-09-03' },
-  { id: 'l1', title: '헬스장 6개월 등록', status: 'todo', category: 'life', classification: '루틴' },
 ]
 
 /* ── colours ── */
@@ -40,10 +29,11 @@ const C = {
 }
 
 export default function App() {
-  const [notices, setNotices] = useState<Notice[]>(initialNotices)
-  const [tasks, setTasks] = useState<Task[]>(initialTasks)
-  const [categories, setCategories] = useState<Category[]>(initialCategories)
-  const [activeCategoryId, setActiveCategoryId] = useState<string>('work')
+  // Never render sample content while the saved session and cloud data are restoring.
+  const [notices, setNotices] = useState<Notice[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [activeCategoryId, setActiveCategoryId] = useState<string>('')
 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isCreatingTask, setIsCreatingTask] = useState(false)
@@ -170,7 +160,7 @@ export default function App() {
 
   const handleSaveTask = (taskData: Omit<Task, 'id'>) => {
     if (isCreatingTask) {
-      const task = { ...taskData, id: `task-${Date.now()}` }
+      const task = { ...taskData, id: `task-${Date.now()}`, sortOrder: tasks.length }
       setTasks((prev) => [...prev, task])
       if (session) syncSafely(saveTask(session.user.id, task))
     } else if (selectedTask) {
@@ -189,10 +179,26 @@ export default function App() {
     if (session) syncSafely(removeTask(id))
   }
 
-  const handleUpdateTaskStatus = (id: string, newStatus: TaskStatus) => {
-    const task = tasks.find((item) => item.id === id)
-    setTasks((prev) => prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item)))
-    if (session && task) syncSafely(saveTask(session.user.id, { ...task, status: newStatus }))
+  const handleMoveTask = (id: string, newStatus: TaskStatus, beforeTaskId?: string) => {
+    const moving = tasks.find((item) => item.id === id)
+    if (!moving) return
+
+    const next = tasks.filter((item) => item.id !== id)
+    const moved = { ...moving, status: newStatus }
+    let insertAt = beforeTaskId ? next.findIndex((item) => item.id === beforeTaskId) : -1
+    if (insertAt < 0) {
+      const lastInColumn = next.reduce((last, item, index) =>
+        item.category === moved.category && item.status === newStatus ? index : last, -1)
+      insertAt = lastInColumn + 1
+    }
+    next.splice(insertAt, 0, moved)
+
+    const reordered = next.map((item, index) => ({ ...item, sortOrder: index }))
+    setTasks(reordered)
+    if (session) {
+      const changed = reordered.filter((item) => item.category === moved.category)
+      syncSafely(Promise.all(changed.map((item) => saveTask(session.user.id, item))))
+    }
   }
 
   const handleAddNotice = (text: string, date?: string) => {
@@ -539,7 +545,7 @@ export default function App() {
             tasks={filteredTasks}
             onSelectTask={handleSelectTask}
             onAddTask={handleAddTask}
-            onUpdateTaskStatus={handleUpdateTaskStatus}
+            onMoveTask={handleMoveTask}
           />
         </div>
 

@@ -53,10 +53,10 @@ export function NoticeListModal({ notices, onDelete, onAdd, onClose }: Props) {
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
         </div>
 
-        <div style={{ padding: '16px', borderBottom: '1px solid #dde1ef', display: 'flex', gap: '8px' }}>
-          <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} style={{ padding: '8px', border: '1px solid #c5cadf', borderRadius: '6px' }} />
-          <input value={newText} onChange={e => setNewText(e.target.value)} onKeyDown={e => e.key === 'Enter' && newText.trim() && (onAdd(newText.trim(), newDate), setNewText(''), setNewDate(''))} placeholder="새 공지사항..." style={{ flex: 1, padding: '8px', border: '1px solid #c5cadf', borderRadius: '6px' }} />
-          <button onClick={() => newText.trim() && (onAdd(newText.trim(), newDate), setNewText(''), setNewDate(''))} style={{ padding: '8px 16px', background: '#5569f8', color: '#fff', borderRadius: '6px', border: 'none', cursor: 'pointer' }}>추가</button>
+        <div className="notice-list-add" style={{ padding: '16px', borderBottom: '1px solid #dde1ef', display: 'flex', gap: '8px' }}>
+          <input className="notice-list-date" type="date" aria-label="공지 날짜 (선택사항)" title="날짜는 선택사항입니다" value={newDate} onChange={e => setNewDate(e.target.value)} style={{ padding: '8px', border: '1px solid #c5cadf', borderRadius: '6px' }} />
+          <input className="notice-list-text" value={newText} onChange={e => setNewText(e.target.value)} onKeyDown={e => e.key === 'Enter' && newText.trim() && (onAdd(newText.trim(), newDate || undefined), setNewText(''), setNewDate(''))} placeholder="새 공지사항 (날짜 선택사항)" style={{ flex: 1, padding: '8px', border: '1px solid #c5cadf', borderRadius: '6px' }} />
+          <button className="notice-list-submit" onClick={() => newText.trim() && (onAdd(newText.trim(), newDate || undefined), setNewText(''), setNewDate(''))} style={{ padding: '8px 16px', background: '#5569f8', color: '#fff', borderRadius: '6px', border: 'none', cursor: 'pointer' }}>추가</button>
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px' }}>
