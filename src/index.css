@@ -166,7 +166,11 @@ select {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 10px !important;
+  align-content: start;
+  align-items: start;
 }
+
+.kanban-col-cards-inner .task-card { width: 100%; }
 
 /* ─── animations ─── */
 @keyframes modal-in {
